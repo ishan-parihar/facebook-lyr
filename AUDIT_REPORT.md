@@ -110,6 +110,30 @@ Commit/push/PyPI/VPS immediately; Tier 1 gaps land as v0.3.0. Faster time-to-val
 
 **Option C — Hybrid.** Ship now, but queue Tier 1 as the first v0.3.0 milestone.
 
+## Resolution (2026-08-04)
+
+Following the owner's decision **"Close gaps, then ship"**, all Tier-1 gaps were implemented, tested, and shipped:
+
+| Tier-1 gap | Status |
+|---|---|
+| `delete_post` | ✅ implemented + live-verified (delete.php) |
+| `save_post` / `unsave_post` | ✅ implemented (best-effort, honest) |
+| `get_notifications` | ✅ implemented + live-verified (real unread data) |
+| `get_events` | ✅ implemented + live-verified (real events) |
+| `get_group_members` | ✅ implemented (legacy ajax; honest empty on private groups) |
+| `delete_message` | ✅ implemented + live-verified (Mercury delete_messages) |
+| edit_message / search_conversations | ❌ endpoint-level 404 — documented as Tier 2 (impossible with cookies) |
+
+**Final state shipped:** 41 tools (34 → 41), **261 tests** (223 → 261), ruff clean, formatted.
+Published to **Test PyPI** (facebook-lyr 0.3.1), pushed to **GitHub**
+(ishan-parihar/facebook-lyr, public), and deployed + cookie-ported to the
+**VPS** (nerd@racknerd) — session valid, live reads confirmed there.
+
+Remaining honest limitations (Tier 2, verified 404): timeline/group publishing,
+commenting, reactions, edit post, follow, friend requests, messenger media,
+message reactions — these require the official Graph API. The tools surface
+clean decommissioned errors rather than faking success.
+
 ---
 
 *Prepared by Buffy · evidence-grounded · nothing real was mutated during probing*
