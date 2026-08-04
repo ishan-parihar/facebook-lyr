@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "facebook-lyr"
+version = "0.3.0"
+description = "Facebook / Messenger MCP server using cookie-based web scraping"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "fastmcp>=2.0.0",
+    "curl-cffi>=0.7.0",
+    "python-dotenv>=1.1.1",
+    "inquirer>=3.4.0",
+    "Pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.4"]
+
+[project.scripts]
+facebook-lyr = "facebook_mcp_server.cli_wrapper:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["facebook_mcp_server*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# B008: FastMCP dependency-injection pattern (ctx: Context = CurrentContext()) —
+#       intentional, mirrors instagram-lyr. BLE001: the error handler and client
+#       deliberately catch all exceptions to surface ToolErrors / translate
+#       scraping failures.
+ignore = ["B008", "BLE001"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

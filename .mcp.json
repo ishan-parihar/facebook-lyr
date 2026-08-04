@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "facebook": {
+      "command": "uv",
+      "args": ["run", "--project", "${__dirname}", "-m", "facebook_mcp_server"],
+      "env": {
+        "FACEBOOK_COOKIES": "${FACEBOOK_COOKIES}"
+      }
+    }
+  }
+}

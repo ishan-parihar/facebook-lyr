@@ -1,0 +1,81 @@
+{
+  "manifest_version": "0.4",
+  "name": "facebook-mcp-server",
+  "display_name": "Facebook / Messenger / Threads MCP Server",
+  "version": "0.2.0",
+  "description": "Connect Claude to Facebook Pages, Messenger, Groups, and Threads via cookie-based web scraping — profile feeds, posting, messaging, comments, and automation",
+  "long_description": "# Facebook / Messenger / Threads MCP Server\n\nConnect Claude to your Facebook account, Messenger inbox, Groups, and Threads with an MCP server backed by cookie-based web scraping (the same approach as instagram-lyr). Authenticate once by importing cookies from your browser (`facebook-lyr --login`) or set `FACEBOOK_COOKIES` for headless agents — no Graph API app, no token generation, no browser automation.\n\n## Quick start\n\n1. Install: `install.sh` (or `uv sync`)\n2. Authenticate: `facebook-lyr --login` (import cookies from your browser)\n3. Verify: `facebook-lyr --status`\n4. Start the MCP server: `facebook-lyr`\n\n## First-time auth flow\n\n1. Log into facebook.com in your browser (complete any 2FA/checkpoint).\n2. Run `facebook-lyr --login` and pick your browser — the session cookies (`c_user` + `xs`) are extracted from the browser's cookie store and saved to `~/.facebook-lyr/profile/cookies.json` (0600).\n3. Retry any tool once auth is configured.\n\nFor headless AI agents, set the `FACEBOOK_COOKIES` environment variable to a JSON object containing at least `c_user` and `xs` — no interactive step needed.",
+  "author": {
+    "name": "Ishan Patel",
+    "email": "ishan@example.com",
+    "url": "https://github.com/ishan-parihar/facebook-lyr"
+  },
+  "homepage": "https://github.com/ishan-parihar/facebook-lyr",
+  "documentation": "https://github.com/ishan-parihar/facebook-lyr#readme",
+  "support": "https://github.com/ishan-parihar/facebook-lyr/issues",
+  "license": "MIT",
+  "keywords": [
+    "facebook",
+    "messenger",
+    "threads",
+    "mcp",
+    "scraping",
+    "cookies",
+    "pages",
+    "posts",
+    "comments",
+    "groups",
+    "messaging",
+    "social-media"
+  ],
+  "server": {
+    "type": "uv",
+    "entry_point": "facebook_mcp_server/__main__.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "${__dirname}",
+        "-m",
+        "facebook_mcp_server"
+      ]
+    }
+  },
+  "tools": [
+    { "name": "get_me", "description": "Get the authenticated Facebook user (cookie session owner)" },
+    { "name": "get_account_status", "description": "Check cookie session validity and active Page" },
+    { "name": "set_active_page", "description": "Record the active Page id/name for context" },
+    { "name": "get_page_info", "description": "Get Page/profile details by username (bio, follower counts)" },
+    { "name": "get_page_posts", "description": "List recent posts from a Page timeline" },
+    { "name": "search_pages", "description": "Search for public Facebook Pages by name" },
+    { "name": "get_user_posts", "description": "List recent posts from a user/Page timeline" },
+    { "name": "get_post_details", "description": "Get details for a single post by URL" },
+    { "name": "create_post", "description": "Publish a text post to the authenticated account (confirm required)" },
+    { "name": "search_posts", "description": "Search public posts by keyword" },
+    { "name": "create_photo_post", "description": "Upload and publish a photo (URL or local file; confirm required)" },
+    { "name": "get_post_comments", "description": "List comments on a post" },
+    { "name": "comment_on_post", "description": "Comment on a post (confirm required)" },
+    { "name": "search_people", "description": "Search for people by name" },
+    { "name": "get_conversations", "description": "List Messenger conversations" },
+    { "name": "get_conversation_messages", "description": "Read messages in a Messenger conversation" },
+    { "name": "send_message", "description": "Send a Messenger text message (confirm required)" },
+    { "name": "send_typing_indicator", "description": "Send a typing_on/typing_off indicator" },
+    { "name": "mark_conversation_seen", "description": "Mark a Messenger conversation as seen" },
+    { "name": "get_group", "description": "Get Facebook group details" },
+    { "name": "get_group_posts", "description": "List recent posts in a Group" },
+    { "name": "search_groups", "description": "Search for Facebook groups by name" },
+    { "name": "get_threads_profile", "description": "Get a public Threads profile (read-only)" },
+    { "name": "get_user_threads", "description": "Get recent public threads for a user (read-only)" },
+    { "name": "close_session", "description": "Close active scrape clients and clean up" }
+  ],
+  "user_config": {},
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ]
+  }
+}
