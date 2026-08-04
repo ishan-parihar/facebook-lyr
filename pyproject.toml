@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "facebook-lyr"
-version = "0.3.0"
+version = "0.3.1"
 description = "Facebook / Messenger MCP server using cookie-based web scraping"
 readme = "README.md"
 requires-python = ">=3.11"

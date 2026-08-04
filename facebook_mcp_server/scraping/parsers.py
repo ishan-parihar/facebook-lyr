@@ -813,6 +813,12 @@ def parse_notifications(html: str, limit: int = 25) -> list[dict[str, Any]]:
             continue
         seen.add(notif_id)
         seen_state = str(payload.get("seen_state") or "")
+        raw_ts = _dig(payload, "creation_time", "timestamp") or payload.get("creation_time") or 0
+        ts = (
+            int(raw_ts)
+            if isinstance(raw_ts, (int, float)) or (isinstance(raw_ts, str) and raw_ts.isdigit())
+            else raw_ts
+        )
         notifications.append(
             {
                 "id": notif_id,
@@ -821,9 +827,7 @@ def parse_notifications(html: str, limit: int = 25) -> list[dict[str, Any]]:
                 "url": payload.get("url") or "",
                 "seen_state": seen_state,
                 "unread": "UNSEEN" in seen_state.upper(),
-                "timestamp": (
-                    _dig(payload, "creation_time", "timestamp") or payload.get("creation_time") or 0
-                ),
+                "timestamp": ts,
             }
         )
         if len(notifications) >= limit:

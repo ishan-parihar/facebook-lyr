@@ -25,9 +25,10 @@ facebook.com session the user's browser has:
   with its own cookie set; switch the active identity; discover which Pages
   the session can act as; import identities from browsers
 - **Profiles & Pages:** profile info (bio, follower counts), timeline posts, page/post/person/group search
-- **Posts:** create text/photo/video/carousel posts, read post details, comment on posts
-- **Messenger:** conversations, message reading/sending, typing indicators, seen markers
-- **Groups:** group info, group feeds, group search
+- **Posts:** create text/photo/video/carousel posts, delete own posts, save/unsave, read post details, comment on posts
+- **Messenger:** conversations, message reading/sending/deleting, typing indicators, seen markers
+- **Groups:** group info, group feeds, group members, group search
+- **Discovery:** notifications and upcoming events for the active identity
 
 ## Quick Start
 
@@ -79,6 +80,12 @@ facebook-lyr create_post --status "Hello world" --confirm true
 facebook-lyr create_photo_post --source /path/img.jpg --message "caption" --confirm true
 facebook-lyr create_video_post --source /path/clip.mp4 --confirm true
 facebook-lyr create_carousel_post --sources '["/a.jpg","/b.jpg"]' --confirm true
+facebook-lyr delete_post --post_id 123 --confirm true
+facebook-lyr save_post --post_id 123 --confirm true
+facebook-lyr delete_message --thread_id <tid> --message_id <mid> --confirm true
+facebook-lyr get_notifications --limit 10
+facebook-lyr get_events --limit 10
+facebook-lyr get_group_members --group_id <gid>
 facebook-lyr get_page_posts --username cocacola --max_posts 5 --json
 ```
 
@@ -88,10 +95,11 @@ facebook-lyr get_page_posts --username cocacola --max_posts 5 --json
 - `list_accounts` / `list_switchable_accounts` / `add_account` / `remove_account` / `switch_active_account` / `get_active_account_info` / `update_account_cookies` / `import_account_from_browser` / `get_account_posting_status` - multi-account
 - `get_page_info` / `get_page_posts` / `search_pages` - Pages
 - `get_user_posts` / `get_post_details` / `search_posts` - posts (read)
-- `create_post` / `create_photo_post` / `create_video_post` / `create_carousel_post` - writes (confirm required)
+- `create_post` / `create_photo_post` / `create_video_post` / `create_carousel_post` / `delete_post` / `save_post` / `unsave_post` - post writes (confirm required)
 - `get_post_comments` / `comment_on_post` - comments
-- `search_people` / `get_conversations` / `get_conversation_messages` / `send_message` / `send_typing_indicator` / `mark_conversation_seen` - Messenger
-- `get_group` / `get_group_posts` / `search_groups` - Groups
+- `search_people` / `get_conversations` / `get_conversation_messages` / `send_message` / `delete_message` / `send_typing_indicator` / `mark_conversation_seen` - Messenger
+- `get_group` / `get_group_posts` / `get_group_members` / `search_groups` - Groups
+- `get_notifications` / `get_events` - discovery
 - `close_session` - close active scrape clients
 
 ## Workflows
@@ -101,11 +109,14 @@ facebook-lyr get_page_posts --username cocacola --max_posts 5 --json
 3. **Publish:** `create_post --status "..." --confirm true` (or photo/video/carousel)
 4. **Engage:** `get_post_comments --post_id <id>` → `comment_on_post --post_id <id> --text "..." --confirm true`
 5. **Messenger:** `get_conversations` → `get_conversation_messages --thread_id <id>` → `send_message --thread_id <id> --message "..." --confirm true`
+6. **Ambient awareness:** `get_notifications` → decide to reply (`get_conversation_messages` → `send_message`), engage (`comment_on_post`), or clean up (`delete_message` / `delete_post` / `save_post`)
+7. **Events & groups:** `get_events` → monitor; `get_group_members --group_id <id>` → community pulse
 
 ## Safety
 
 Write tools (`create_post`, `create_photo_post`, `create_video_post`,
-`create_carousel_post`, `comment_on_post`, `send_message`) require
+`create_carousel_post`, `delete_post`, `save_post`, `unsave_post`,
+`comment_on_post`, `send_message`, `delete_message`) require
 `confirm=true`, validate inputs, respect per-identity daily posting limits,
 and are paced with a human-like minimum gap. Respect the user's account and
 Facebook's community standards; do not spam posts, comments, or messages.
@@ -128,6 +139,11 @@ Errors come back as `ToolError` with a next-step hint:
 - Write endpoints (`updatestatus.php`, `ufi_composer.php`, `send_messages.php`)
   are decommissioned (404) on accounts migrated to the modern GraphQL
   composer — those tools fail honestly instead of faking success.
+- Working cookie-era writes: `delete_post` (delete.php), `save_post` /
+  `unsave_post` (best-effort), `delete_message` (Mercury delete_messages).
+- `get_notifications`, `get_events`, and `get_group_members` parse what the
+  initial page embeds; client-side-only data (event detail, member lists on
+  private groups) returns an honest empty result.
 - Identity switching server-side is decommissioned; act as another identity by
   importing its cookie set (multi-account tools).
 - Messenger message bodies on E2EE accounts and group feeds render

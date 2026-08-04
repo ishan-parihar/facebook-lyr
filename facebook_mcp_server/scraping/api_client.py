@@ -908,6 +908,14 @@ class FacebookScrapeClient:
             ) from None
         body = getattr(resp, "text", "") or ""
         lowered = body.lower()
+        # ``check_wall=False`` skips automatic login-wall detection (the
+        # endpoint returns HTML, not JSON) — do it explicitly so an expired
+        # session surfaces as AuthenticationError (re-login), never as a
+        # false "deleted".
+        if parsers.detect_login_wall(body, str(getattr(resp, "url", "") or "")):
+            raise AuthenticationError(
+                "Facebook session expired (login wall). Run --login to re-authenticate."
+            )
         # For live posts Facebook renders the delete confirmation/processing
         # page; for missing or undeletable posts it renders an availability
         # error instead.
@@ -918,7 +926,7 @@ class FacebookScrapeClient:
             or "no longer available" in lowered
         ):
             raise ScrapingError(f"Post {post_id} is not available or was already deleted.")
-        if '"errorSummary"' in body or ">something's gone wrong" in lowered:
+        if "errorSummary" in body or "something's gone wrong" in lowered:
             raise ScrapingError(f"Facebook could not delete post {post_id}: {body[:200]}")
         return {
             "success": True,
@@ -942,7 +950,7 @@ class FacebookScrapeClient:
     async def _save_post_once(self, post_id: str, action: str) -> dict[str, Any]:
         dtsg = await self.get_fb_dtsg()
         try:
-            await self._request(
+            resp = await self._request(
                 "POST",
                 "/ajax/saved/",
                 data={
@@ -959,6 +967,14 @@ class FacebookScrapeClient:
                 "(saved endpoint returns 404). The official Graph API is "
                 "required."
             ) from None
+        body = getattr(resp, "text", "") or ""
+        # Same explicit login-wall check as delete_post: ``check_wall=False``
+        # means an expired session returning the login page must not be
+        # reported as a successful save.
+        if parsers.detect_login_wall(body, str(getattr(resp, "url", "") or "")):
+            raise AuthenticationError(
+                "Facebook session expired (login wall). Run --login to re-authenticate."
+            )
         return {
             "success": True,
             "post_id": post_id,
@@ -1005,7 +1021,12 @@ class FacebookScrapeClient:
             except json.JSONDecodeError:
                 raise ScrapingError(f"Unexpected delete_messages response: {body[:160]}") from None
             if isinstance(data, dict) and data.get("error"):
-                detail = parsers.extract_error_message(data) or str(data.get("error"))
+                detail = (
+                    data.get("errorDescription")
+                    or data.get("errorSummary")
+                    or parsers.extract_error_message(data)
+                    or str(data.get("error"))
+                )
                 raise ScrapingError(f"Message delete failed: {detail}")
         return {
             "success": True,

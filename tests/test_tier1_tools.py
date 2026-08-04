@@ -251,6 +251,28 @@ class TestApiClientTransports:
             await client.save_post("123")
 
     @pytest.mark.asyncio
+    async def test_delete_post_login_wall_raises_auth(self, monkeypatch):
+        """Regression: an expired session returning the login page (200 HTML)
+        must raise AuthenticationError (re-login), never a false success."""
+        from facebook_mcp_server.core import AuthenticationError
+
+        client = _scrape_client(monkeypatch)
+        login_html = '<html><body><form action="/login/"><input name="pass"></form></body></html>'
+        monkeypatch.setattr(client, "_request", _stub_request(200, login_html))
+        with pytest.raises(AuthenticationError):
+            await client.delete_post("123")
+
+    @pytest.mark.asyncio
+    async def test_save_post_login_wall_raises_auth(self, monkeypatch):
+        from facebook_mcp_server.core import AuthenticationError
+
+        client = _scrape_client(monkeypatch)
+        login_html = '<html><body><form action="/login/"><input name="pass"></form></body></html>'
+        monkeypatch.setattr(client, "_request", _stub_request(200, login_html))
+        with pytest.raises(AuthenticationError):
+            await client.save_post("123")
+
+    @pytest.mark.asyncio
     async def test_save_post_submitted_best_effort(self, monkeypatch):
         client = _scrape_client(monkeypatch)
         monkeypatch.setattr(client, "_request", _stub_request(200, "<html>ok</html>"))
