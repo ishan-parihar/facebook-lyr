@@ -139,6 +139,7 @@ class PostingClient:
         # unsave on the cookie client.
         from facebook_mcp_server.scraping.graph_api import (
             GraphApiClient,
+            graph_page_id_from_env,
             graph_token_from_env,
         )
 
@@ -147,7 +148,7 @@ class PostingClient:
             logger.info("Graph API token present — using GraphApiClient transport")
             return GraphApiClient(
                 token,
-                page_id=os.environ.get("FACEBOOK_GRAPH_API_PAGE_ID") or None,
+                page_id=graph_page_id_from_env(),
                 cookie_client=scrape_client,
             )
         return scrape_client

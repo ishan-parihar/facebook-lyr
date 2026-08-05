@@ -15,6 +15,10 @@ or "save" surface.
 Auth: an app/user access token from ``FACEBOOK_GRAPH_API_TOKEN``. The target
 page id comes from ``FACEBOOK_GRAPH_API_PAGE_ID``, else the recorded active
 Page, else ``GET /me/accounts``.
+
+Both keys are read from the process environment first, then fall back to a
+sidecar ``~/.facebook-lyr/.env`` — so a self-hosted deployment ships the
+token as a file without exporting it in the shell.
 """
 
 import asyncio
@@ -39,6 +43,9 @@ GRAPH_API_VERSION = "v20.0"
 GRAPH_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 TOKEN_KEY = "FACEBOOK_GRAPH_API_TOKEN"
 PAGE_ID_KEY = "FACEBOOK_GRAPH_API_PAGE_ID"
+
+HOME_DIR = Path.home() / ".facebook-lyr"
+_ENV_FILE = HOME_DIR / ".env"
 
 
 class GraphApiClient:
@@ -447,9 +454,32 @@ class GraphApiClient:
         return await self._cookie_client.delete_message(thread_id, message_id)
 
 
-def graph_token_from_env() -> str | None:
-    """Read the Graph API token from the environment, if configured."""
-    token = os.environ.get(TOKEN_KEY)
-    if token and token.strip():
-        return token.strip()
+def _env_value(key: str) -> str | None:
+    """Read ``key`` from the process environment, else the sidecar .env."""
+    value = os.environ.get(key)
+    if value and value.strip():
+        return value.strip()
+    try:
+        if _ENV_FILE.is_file():
+            for line in _ENV_FILE.read_text().splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, _, v = line.partition("=")
+                if k.strip() == key:
+                    v = v.strip().strip('"').strip("'")
+                    if v:
+                        return v
+    except OSError:
+        pass
     return None
+
+
+def graph_token_from_env() -> str | None:
+    """Read the Graph API token from the environment or sidecar .env."""
+    return _env_value(TOKEN_KEY)
+
+
+def graph_page_id_from_env() -> str | None:
+    """Read the target page id from the environment or sidecar .env."""
+    return _env_value(PAGE_ID_KEY)
