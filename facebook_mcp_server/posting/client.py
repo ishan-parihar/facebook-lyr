@@ -16,6 +16,7 @@ surfaces honestly ("official API required") and the attempt is recorded.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 from facebook_mcp_server.core import AuthenticationError, ScrapingError
@@ -129,7 +130,27 @@ class PostingClient:
             except Exception:
                 logger.debug("No cookie sink for default profile", exc_info=True)
 
-        return FacebookScrapeClient(self.cookies, cookie_sink=sink)
+        scrape_client = FacebookScrapeClient(self.cookies, cookie_sink=sink)
+
+        # Graph API write transport (token-configured): the legacy ajax write
+        # surface is decommissioned (see the mutating-tool audit), so when a
+        # FACEBOOK_GRAPH_API_TOKEN is present, route the decommissioned
+        # mutations through the official Graph API and keep messenger + save/
+        # unsave on the cookie client.
+        from facebook_mcp_server.scraping.graph_api import (
+            GraphApiClient,
+            graph_token_from_env,
+        )
+
+        token = graph_token_from_env()
+        if token:
+            logger.info("Graph API token present — using GraphApiClient transport")
+            return GraphApiClient(
+                token,
+                page_id=os.environ.get("FACEBOOK_GRAPH_API_PAGE_ID") or None,
+                cookie_client=scrape_client,
+            )
+        return scrape_client
 
     # ── posting helpers ────────────────────────────────────────────────────
 
