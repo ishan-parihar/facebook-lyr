@@ -1112,14 +1112,19 @@ class FacebookScrapeClient:
 
         dtsg = await self.get_fb_dtsg()
         mime = "image/png" if filename.lower().endswith(".png") else "image/jpeg"
-        # curl_cffi multipart upload (files=) — translate HTTP failures the
-        # same way the rest of the client does before parsing the body.
+        # curl_cffi multipart upload — the old ``files=`` kwarg raises at
+        # runtime on curl_cffi >= 0.16; use a ``CurlMime`` object built by hand
+        # (``multipart=`` is not a simple dict — it expects a ``CurlMime``).
+        import curl_cffi
+
+        mp = curl_cffi.CurlMime()
+        mp.addpart(name="file1", content_type=mime, filename=filename, data=content)
         final = await self._client.request(
             "POST",
             f"{FACEBOOK_BASE}/ajax/composer/attachment/create/upload/",
             params={"dpr": "1"},
             data={"fb_dtsg": dtsg, "source": "8"},
-            files={"file1": (filename, content, mime)},
+            multipart=mp,
         )
         if final.status_code in (401, 403):
             raise AuthenticationError(
@@ -1227,12 +1232,16 @@ class FacebookScrapeClient:
 
         dtsg = await self.get_fb_dtsg()
         mime = "video/mp4"
+        import curl_cffi
+
+        mp = curl_cffi.CurlMime()
+        mp.addpart(name="file1", content_type=mime, filename=filename, data=content)
         final = await self._client.request(
             "POST",
             f"{FACEBOOK_BASE}/ajax/composer/attachment/create/upload/",
             params={"dpr": "1"},
             data={"fb_dtsg": dtsg, "source": "3"},
-            files={"file1": (filename, content, mime)},
+            multipart=mp,
         )
         if final.status_code in (401, 403):
             raise AuthenticationError(

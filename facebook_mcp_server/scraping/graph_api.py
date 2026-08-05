@@ -87,7 +87,7 @@ class GraphApiClient:
     async def close(self) -> None:
         if self._session is not None:
             try:
-                self._session.close()
+                await self._session.close()
             except Exception:
                 pass
             self._session = None
@@ -252,6 +252,10 @@ class GraphApiClient:
                 "image/png" if local.suffix.lower() in (".png",) else "image/jpeg"
             )
             mp = curl_cffi.CurlMime()
+            mp.addpart(
+                name="published",
+                data=b"false",
+            )
             mp.addpart(
                 name="source",
                 content_type=mime,
