@@ -146,17 +146,25 @@ Cookie rotations (xs/fr refreshes) are written back to the owning identity's sto
 
 ## Honest limitations
 
-Facebook has been decommissioning its cookie-era write endpoints. Where an endpoint is dead, the tool **fails loudly and honestly** instead of faking success:
+Facebook has been decommissioning its cookie-era write endpoints. Where a write path is dead, the tool **fails loudly and honestly** instead of faking success:
 
 | Capability | Status |
 |---|---|
-| Timeline publishing (text/photo/video/carousel), commenting | 🔴 decommissioned for migrated accounts — returns a clear "official API required" error |
-| React to post/comment, edit post, follow, friend requests | 🔴 endpoint removed (404) — not possible with cookies |
-| Messenger media upload, message reactions | 🔴 endpoint removed (404) |
-| Delete own post, save/unsave, notifications, events, group members | 🟢 **working** (legacy endpoints still alive) |
-| Messenger text send / delete / typing / seen | 🟢 working (Mercury ajax) |
+| Timeline publishing (text/photo/video/carousel) via **Graph API** | 🟢 **working** — requires a page-scoped token (see below); the cookie path is decommissioned |
+| Comment on posts / delete own posts | 🟢 working (Graph API for comments, cookie `delete.php` for delete) |
+| Save / unsave posts, notifications, events, group members | 🟢 working (legacy endpoints still alive) |
+| Messenger text send / delete / typing / seen | 🔴 **decommissioned** — `send_messages.php` returns 404 (verified live); the read side (`get_conversations`) still works |
+| React to post/comment, edit post, follow, friend requests, Messenger media/reactions | 🔴 endpoint removed (404) — not possible with cookies or the current token |
+| Post via cookies for migrated accounts | 🔴 returns a clear "official API required" error |
 
-Read tools are unaffected. For the decommissioned cluster, the **official Graph API** (Page/App tokens) is the required path — the same constraint that killed cookie-based posting libraries.
+**Graph API writes** need a page-scoped access token, deployed as a sidecar `~/.facebook-lyr/.env`:
+
+```bash
+FACEBOOK_GRAPH_API_TOKEN=...
+FACEBOOK_GRAPH_API_PAGE_ID=...
+```
+
+When the token is present, `facebook-lyr` automatically routes timeline publishing + comments through the Graph API; without it, those writes fail honestly with the "official API required" error. Read tools and the messenger read side are unaffected.
 
 ## CLI reference
 
