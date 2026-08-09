@@ -43,7 +43,7 @@ facebook-lyr get_feed --num_posts 10
 The facebook-lyr CLI serves as an MCP server with the following tools:
 
 ### Profile Tools
-- `get_user_profile` - Get user profile with optional sections
+- `get_person_profile` - Get user profile with optional sections
 - `get_page_profile` - Get page profile with optional sections
 
 ### Content Tools
@@ -152,7 +152,7 @@ The CLI will automatically check for existing Facebook session at `~/.facebook-l
 
 **Skill Processing:**
 1. Identify as a profile operation
-2. Generate command: `facebook-lyr get_user_profile --facebook_username zuck --sections posts`
+2. Generate command: `facebook-lyr get_person_profile --facebook_username zuck --sections posts`
 3. Execute and parse results
 4. Report profile to user
 
