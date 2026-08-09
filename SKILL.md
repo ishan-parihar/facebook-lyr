@@ -31,8 +31,14 @@ facebook-lyr get_user_profile --facebook_username zuck --sections posts
 # Get page profile
 facebook-lyr get_page_profile --facebook_username meta --sections posts
 
-# Get feed
-facebook-lyr get_feed --num_posts 10
+# Search users
+facebook-lyr search_users --query "software engineer" --limit 10
+
+# Search groups
+facebook-lyr search_groups --query "photography" --limit 5
+
+# Search pages
+facebook-lyr search_pages --query "tech news" --limit 5
 ```
 
 ## MCP Tool Usage
@@ -56,6 +62,11 @@ The facebook-lyr CLI serves as an MCP server with the following tools:
 ### Engagement Tools
 - `like_post` - Like a post
 - `comment_on_post` - Comment on a post
+
+### Search Tools
+- `search_users` - Search for users on Facebook
+- `search_groups` - Search for Facebook groups
+- `search_pages` - Search for Facebook pages
 
 ### Session Tools
 - `session_status` - Check the current session status
@@ -160,6 +171,14 @@ The CLI will automatically check for existing Facebook session at `~/.facebook-l
 2. Generate command: `facebook-lyr get_page_profile --facebook_username meta --sections posts`
 3. Execute and format results
 4. Report page posts to user
+
+### User Request: "Search for photography groups"
+
+**Skill Processing:**
+1. Identify as a search operation
+2. Generate command: `facebook-lyr search_groups --query "photography" --limit 5`
+3. Execute and format results
+4. Report groups to user
 
 ### User Request: "Send a message via Messenger"
 
