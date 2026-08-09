@@ -179,7 +179,20 @@ check_facebook_session() {
     fi
 }
 
-# ── 7. Print MCP Configs ─────────────────────────────────
+# ── 7. Install AI Agent Skills ───────────────────────────
+install_ai_skills() {
+    step "Installing AI agent skills"
+    mkdir -p ~/.agents/skills
+    
+    if [ -d "${REPO_DIR}/.agents/skills" ]; then
+        cp -r "${REPO_DIR}/.agents/skills"/* ~/.agents/skills/
+        success "AI agent skills installed to ~/.agents/skills/"
+    else
+        warn "No AI agent skills found in repository"
+    fi
+}
+
+# ── 8. Print MCP Configs ─────────────────────────────────
 print_mcp_configs() {
     step "MCP Client Configurations"
 
@@ -217,7 +230,7 @@ print_mcp_configs() {
     echo ""
 }
 
-# ── 8. Print Next Steps ──────────────────────────────────
+# ── 9. Print Next Steps ──────────────────────────────────
 print_next_steps() {
     step "Next Steps"
 
@@ -251,6 +264,7 @@ main() {
     install_dependencies
     validate_installation
     check_facebook_session
+    install_ai_skills
     print_mcp_configs
     print_next_steps
 

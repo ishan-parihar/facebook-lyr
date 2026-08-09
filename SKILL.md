@@ -1,152 +1,179 @@
-# Facebook / Messenger MCP Server
+---
+name: facebook-lyr
+description: Facebook/Messenger/Threads automation with profiles, posts, Messenger, and analytics. Use this skill whenever the user requests Facebook operations, social media posting, content creation, or any Facebook-related tasks. Triggers on phrases like "facebook post", "facebook search", "facebook message", "facebook automation", "social media posting", "content creation", "messenger", "facebook profile", "search facebook", or any request for Facebook functionality.
+---
 
-description: Facebook Pages, Messenger, Groups, and multi-account automation via browser-cookie scraping — profile feeds, posting (text/photo/video/carousel), messaging, comments, and account switching. Use for any task involving a Facebook profile/Page, Messenger conversations, Facebook Groups, or managing multiple Facebook identities.
-triggers:
-  - "facebook post"
-  - "facebook page"
-  - "facebook profile"
-  - "facebook messenger"
-  - "facebook comment"
-  - "facebook group"
-  - "facebook account switch"
-  - "facebook pages admin"
-  - "messenger message"
-  - "social media posting"
-  - "content creation"
+# Facebook-lyr Skill
 
-> Threads is separate: use the `threads-lyr` project for public Threads reading.
+This skill enables AI agents to interact with Facebook/Messenger/Threads using the facebook-lyr CLI tool. It provides comprehensive Facebook automation including profiles, posts, Messenger, and analytics.
 
-## Overview
+## Prerequisites
 
-The Facebook MCP Server gives agents cookie-authenticated access to the same
-facebook.com session the user's browser has:
+- facebook-lyr CLI must be installed globally on the system
+- The CLI must be accessible in the system PATH
+- Browser cookies are required for authenticated operations
 
-- **Multi-account:** store multiple identities (user + Pages + profiles), each
-  with its own cookie set; switch the active identity; discover which Pages
-  the session can act as; import identities from browsers
-- **Profiles & Pages:** profile info (bio, follower counts), timeline posts, page/post/person/group search
-- **Posts:** create text/photo/video/carousel posts, delete own posts, save/unsave, read post details, comment on posts
-- **Messenger:** conversations, message reading/sending/deleting, typing indicators, seen markers
-- **Groups:** group info, group feeds, group members, group search
-- **Discovery:** notifications and upcoming events for the active identity
+## Command Structure
 
-## Quick Start
+### Available Commands
 
 ```bash
-facebook-lyr                 # Home view with live session state
-facebook-lyr --status        # Check cookie session validity
-facebook-lyr --login         # Import browser cookies interactively
-facebook-lyr --list-tools    # List available tools
-facebook-lyr --tool-info <tool>  # Tool parameters
+# Session management
+facebook-lyr                          # Start MCP server
+facebook-lyr --login                  # Import browser cookies
+facebook-lyr --status                 # Check session status
+facebook-lyr --list-tools             # List available MCP tools
+
+# Content commands (examples via MCP tools)
+# Get user profile
+facebook-lyr get_user_profile --facebook_username zuck --sections posts
+
+# Get page profile
+facebook-lyr get_page_profile --facebook_username meta --sections posts
+
+# Get feed
+facebook-lyr get_feed --num_posts 10
+```
+
+## MCP Tool Usage
+
+The facebook-lyr CLI serves as an MCP server with the following tools:
+
+### Profile Tools
+- `get_user_profile` - Get user profile with optional sections
+- `get_page_profile` - Get page profile with optional sections
+
+### Content Tools
+- `get_user_posts` - Get user's posts
+- `get_user_reels` - Get user's reels
+- `get_user_stories` - Get user's stories
+
+### Messenger Tools
+- `get_thread_list` - Get list of conversation threads
+- `get_thread_info` - Get details of a specific conversation
+- `send_message` - Send a message
+
+### Engagement Tools
+- `like_post` - Like a post
+- `comment_on_post` - Comment on a post
+
+### Session Tools
+- `session_status` - Check the current session status
+
+## MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "facebook": {
+      "command": "uv",
+      "args": ["run", "-m", "facebook_mcp_server"],
+      "cwd": "/path/to/facebook-lyr",
+      "env": { "FACEBOOK_COOKIES": "{\"c_user\":\"...\",\"xs\":\"...\"}" }
+    }
+  }
+}
+```
+
+Or using uvx (no clone needed):
+```json
+{
+  "mcpServers": {
+    "facebook": {
+      "command": "uvx",
+      "args": ["facebook-lyr"]
+    }
+  }
+}
 ```
 
 ## Authentication
 
-- **Interactive:** `facebook-lyr --login` — imports cookies from the user's
-  browser (Brave, Chrome, Edge, Firefox, Zen, ...). The session is stored at
-  `~/.facebook-lyr/profile/cookies.json` (0600).
-- **Headless agents:** export `FACEBOOK_COOKIES` as a JSON object containing
-  at least `c_user` and `xs`:
-  ```bash
-  export FACEBOOK_COOKIES='{"c_user":"12345","xs":"abc..."}'
-  ```
-- On session expiry, tools return a clear `ToolError` and trigger re-login.
-
-## Multi-Account
+Set `FACEBOOK_COOKIES` env var or run `--login` for browser-based auth:
 
 ```bash
-facebook-lyr list_accounts
-facebook-lyr list_switchable_accounts      # Pages/profiles this session can act as
-facebook-lyr add_account --account_id <id> --name "My Page" --cookies '{"c_user":"..","xs":".."}'
-facebook-lyr import_account_from_browser --account_id <id> --name "My Page" --browser zen
-facebook-lyr switch_active_account --account_id <id>
-facebook-lyr get_active_account_info
-facebook-lyr get_account_posting_status --account_id <id>
+facebook-lyr --login
 ```
 
-Every read/write tool acts as the **active identity**; pass `--account_id` to
-override per call. Posting limits and history are tracked per identity.
+## Session Integration
 
-## Direct CLI Tool Execution
+The CLI will automatically check for existing Facebook session at `~/.facebook-lyr/profile/cookies.json`.
 
-```bash
-facebook-lyr get_me
-facebook-lyr get_account_status
-facebook-lyr get_page_info --username cocacola
-facebook-lyr get_page_posts --username cocacola --max_posts 10
-facebook-lyr get_conversations
-facebook-lyr send_message --thread_id <tid> --message "Hi" --confirm true
-facebook-lyr create_post --status "Hello world" --confirm true
-facebook-lyr create_photo_post --source /path/img.jpg --message "caption" --confirm true
-facebook-lyr create_video_post --source /path/clip.mp4 --confirm true
-facebook-lyr create_carousel_post --sources '["/a.jpg","/b.jpg"]' --confirm true
-facebook-lyr delete_post --post_id 123 --confirm true
-facebook-lyr save_post --post_id 123 --confirm true
-facebook-lyr delete_message --thread_id <tid> --message_id <mid> --confirm true
-facebook-lyr get_notifications --limit 10
-facebook-lyr get_events --limit 10
-facebook-lyr get_group_members --group_id <gid>
-facebook-lyr get_page_posts --username cocacola --max_posts 5 --json
-```
+## Workflow
 
-## MCP Tools
+### Step 1: Analyze User Request
+- Determine the type of Facebook operation needed (profile, search, post, message)
+- Identify if authentication is required
+- Select appropriate command based on user intent
 
-- `get_me` / `get_account_status` / `set_active_page` - account
-- `list_accounts` / `list_switchable_accounts` / `add_account` / `remove_account` / `switch_active_account` / `get_active_account_info` / `update_account_cookies` / `import_account_from_browser` / `get_account_posting_status` - multi-account
-- `get_page_info` / `get_page_posts` / `search_pages` - Pages
-- `get_user_posts` / `get_post_details` / `search_posts` - posts (read)
-- `create_post` / `create_photo_post` / `create_video_post` / `create_carousel_post` / `delete_post` / `save_post` / `unsave_post` - post writes (confirm required)
-- `get_post_comments` / `comment_on_post` - comments
-- `search_people` / `get_conversations` / `get_conversation_messages` / `send_message` / `delete_message` / `send_typing_indicator` / `mark_conversation_seen` - Messenger
-- `get_group` / `get_group_posts` / `get_group_members` / `search_groups` - Groups
-- `get_notifications` / `get_events` - discovery
-- `close_session` - close active scrape clients
+### Step 2: Generate Command
+- Use the command structure above to build the appropriate CLI command
+- Add relevant flags for sections, limits, and output format
+- Include any required parameters (usernames, query terms, etc.)
 
-## Workflows
+### Step 3: Execute and Validate
+- Run the command using shell execution
+- Check for successful completion
+- Parse the output in the appropriate format
+- Report the result to the user
 
-1. **Discover:** `get_me` → `list_switchable_accounts` → `get_page_posts` / `get_conversations`
-2. **Switch identity:** `switch_active_account --account_id <id>` then act
-3. **Publish:** `create_post --status "..." --confirm true` (or photo/video/carousel)
-4. **Engage:** `get_post_comments --post_id <id>` → `comment_on_post --post_id <id> --text "..." --confirm true`
-5. **Messenger:** `get_conversations` → `get_conversation_messages --thread_id <id>` → `send_message --thread_id <id> --message "..." --confirm true`
-6. **Ambient awareness:** `get_notifications` → decide to reply (`get_conversation_messages` → `send_message`), engage (`comment_on_post`), or clean up (`delete_message` / `delete_post` / `save_post`)
-7. **Events & groups:** `get_events` → monitor; `get_group_members --group_id <id>` → community pulse
+### Step 4: Handle Errors
+- If authentication fails: guide user to run `facebook-lyr --login`
+- If command not found: suggest installing facebook-lyr
+- If rate limited: suggest waiting before retrying
+- If invalid parameters: provide correct usage examples
 
-## Safety
+## Error Handling
 
-Write tools (`create_post`, `create_photo_post`, `create_video_post`,
-`create_carousel_post`, `delete_post`, `save_post`, `unsave_post`,
-`comment_on_post`, `send_message`, `delete_message`) require
-`confirm=true`, validate inputs, respect per-identity daily posting limits,
-and are paced with a human-like minimum gap. Respect the user's account and
-Facebook's community standards; do not spam posts, comments, or messages.
+### Common Issues and Solutions
 
-## Errors
+1. **Command not found**
+   - Error: "facebook-lyr: command not found"
+   - Solution: Install facebook-lyr globally or add to PATH
 
-Errors come back as `ToolError` with a next-step hint:
+2. **Authentication errors**
+   - Error: "Authentication required"
+   - Solution: Run `facebook-lyr --login` to import browser cookies
 
-- **Session expired / login wall** → run `--login` or refresh `FACEBOOK_COOKIES`
-- **Rate limited (429)** → wait the suggested time and reduce burstiness
-- **Page not found (404)** → check the username/URL
-- **Write decommissioned ("official API required")** → the account has migrated
-  to Facebook's private GraphQL composer; the write cannot be done with cookies.
-  The attempt was validated and recorded honestly in the identity's posting
-  history — use the official Graph API for that write.
-- **Account not found** → `add_account` / `import_account_from_browser` first
+3. **Rate limiting**
+   - Error: "Rate limit exceeded"
+   - Solution: Wait before retrying the operation
 
-## Limitations
+4. **Invalid parameters**
+   - Error: "Invalid username/URL"
+   - Solution: Verify the username or URL is correct
 
-- Write endpoints (`updatestatus.php`, `ufi_composer.php`, `send_messages.php`)
-  are decommissioned (404) on accounts migrated to the modern GraphQL
-  composer — those tools fail honestly instead of faking success.
-- Working cookie-era writes: `delete_post` (delete.php), `save_post` /
-  `unsave_post` (best-effort), `delete_message` (Mercury delete_messages).
-- `get_notifications`, `get_events`, and `get_group_members` parse what the
-  initial page embeds; client-side-only data (event detail, member lists on
-  private groups) returns an honest empty result.
-- Identity switching server-side is decommissioned; act as another identity by
-  importing its cookie set (multi-account tools).
-- Messenger message bodies on E2EE accounts and group feeds render
-  client-side and cannot be scraped from HTML.
-- Timeline depth is limited to the first page of embedded JSON.
-- Page insights are not available via cookie scraping.
+## Integration Example
+
+### User Request: "Get Mark Zuckerberg's Facebook profile"
+
+**Skill Processing:**
+1. Identify as a profile operation
+2. Generate command: `facebook-lyr get_user_profile --facebook_username zuck --sections posts`
+3. Execute and parse results
+4. Report profile to user
+
+### User Request: "Get Meta's Facebook page posts"
+
+**Skill Processing:**
+1. Identify as a page operation
+2. Generate command: `facebook-lyr get_page_profile --facebook_username meta --sections posts`
+3. Execute and format results
+4. Report page posts to user
+
+### User Request: "Send a message via Messenger"
+
+**Skill Processing:**
+1. Identify as a write operation requiring authentication
+2. Generate command: `facebook-lyr send_message --recipient <user> --text "Message"`
+3. Execute and report results
+
+## Best Practices
+
+1. **Always check authentication requirements** before executing write operations
+2. **Use appropriate sections** when getting profiles (posts, experience, skills, etc.)
+3. **Handle rate limiting gracefully** by suggesting delays between operations
+4. **Provide context in results** when returning content data (author, timestamp, metrics)
+5. **Use reasonable limits** when browsing to avoid overwhelming results
+6. **Handle errors with actionable suggestions** for resolution
+7. **Verify usernames** before messaging to ensure they exist
