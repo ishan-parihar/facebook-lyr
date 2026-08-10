@@ -1,3 +1,5 @@
+
+<!-- T2I HERO SPEC — Subject: a Facebook data engine — a blue profile/fan-page frame feeding posts, comments, and groups through a pipeline into clean structured data for agents. Composition: page frame → extraction → JSON cards. Palette: facebook blue #1877f2 → dark slate → clean white. Style: dark flat vector, thumb icon motif, no text. 16:9. -->
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11+-2b6cb0?style=flat&logo=python&logoColor=white" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/uv-0.6%2B-7c3aed?style=flat&logo=astral&logoColor=white" alt="uv">
