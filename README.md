@@ -3,6 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11+-2b6cb0?style=flat&logo=python&logoColor=white" alt="Python 3.11+">
 <img src="https://img.shields.io/badge/LOC-14.0K-informational?style=flat-square" alt="LOC">
+<img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Status">
 <a href="https://github.com/ishan-parihar/facebook-lyr/actions/workflows/ci.yml"><img src="https://github.com/ishan-parihar/facebook-lyr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/uv-0.6%2B-7c3aed?style=flat&logo=astral&logoColor=white" alt="uv">
   <img src="https://img.shields.io/badge/license-MIT-059669?style=flat" alt="MIT">
