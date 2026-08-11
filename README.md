@@ -2,6 +2,7 @@
 <!-- T2I HERO SPEC — Subject: a Facebook data engine — a blue profile/fan-page frame feeding posts, comments, and groups through a pipeline into clean structured data for agents. Composition: page frame → extraction → JSON cards. Palette: facebook blue #1877f2 → dark slate → clean white. Style: dark flat vector, thumb icon motif, no text. 16:9. -->
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11+-2b6cb0?style=flat&logo=python&logoColor=white" alt="Python 3.11+">
+![LOC](https://img.shields.io/badge/LOC-13.7K-informational?style=flat-square)
 [![CI](https://github.com/ishan-parihar/facebook-lyr/actions/workflows/ci.yml/badge.svg)](https://github.com/ishan-parihar/facebook-lyr/actions/workflows/ci.yml)
   <img src="https://img.shields.io/badge/uv-0.6%2B-7c3aed?style=flat&logo=astral&logoColor=white" alt="uv">
   <img src="https://img.shields.io/badge/license-MIT-059669?style=flat" alt="MIT">
@@ -192,3 +193,14 @@ uv run ruff check .
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+## ☕ Support & Sponsorship
+
+If you find this project useful, consider supporting ongoing development:
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?style=flat-square&logo=github)](https://github.com/sponsors/ishan-parihar)
+[![Donate](https://img.shields.io/badge/Donate-Razorpay-3395FF?style=flat-square)](https://rzp.io/rzp/ishan-parihar)
+
+Your support funds new features, releases, and infrastructure for the whole ecosystem.
