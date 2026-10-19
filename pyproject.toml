@@ -17,7 +17,7 @@ dependencies = [
     "Pillow>=10.0.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.4"]
 
 [project.scripts]
@@ -27,17 +27,23 @@ facebook-lyr = "facebook_mcp_server.cli_wrapper:main"
 where = ["."]
 include = ["facebook_mcp_server*"]
 
+
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-# B008: FastMCP dependency-injection pattern (ctx: Context = CurrentContext()) —
-#       intentional, mirrors instagram-lyr. BLE001: the error handler and client
-#       deliberately catch all exceptions to surface ToolErrors / translate
-#       scraping failures.
-ignore = ["B008", "BLE001"]
-
+# Curated rule set (family convention): the codebase is written against
+# E/F/I/B/UP — not ruff's unbounded default. Explicit select keeps the CI
+# gate deterministic instead of tracking whatever rules new ruff versions
+# enable by default.
+select = ["E", "F", "I", "B", "UP"]
+ignore = [
+    "E501",   # line length handled by the formatter
+    "B008",   # FastMCP dependency-injection pattern (ctx: Context = CurrentContext())
+    "BLE001", # error handler deliberately catches all exceptions
+]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
