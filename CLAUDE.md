@@ -53,6 +53,7 @@ uv run facebook-lyr --list-tools
 uv run facebook-lyr --status   # uses real cookies if configured
 ```
 
+*(Commands reviewed 2026-10-19: the section above still holds the commands that build and test this repo.)*
 ## Auth checks
 
 - `FACEBOOK_COOKIES` env JSON: must include `c_user` and `xs`.
