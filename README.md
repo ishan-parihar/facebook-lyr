@@ -32,6 +32,8 @@
 
 Modeled directly on [`instagram-lyr`](https://github.com/ishan-parihar/instagram-lyr) — the same architecture, CLI conventions, and browser-cookie authentication flow. Threads lives in a separate project (`threads-lyr`).
 
+- [Page index](docs/PAGE-INDEX.md) — every active doc and the question it owns.
+
 ## Why cookie scraping?
 
 The official Graph API requires a Meta developer app, app review, and page-scoped tokens — and it cannot see anything your app wasn't granted. Cookie scraping reuses the **exact session your browser has**, so the agent reads and acts on Facebook the way *you* would: full timelines, groups, Messenger inboxes, notifications, and events.
