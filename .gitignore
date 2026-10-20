@@ -37,3 +37,8 @@ config.json
 .sisyphus/
 .oh-my-opencode/
 .history/
+
+# genome runtime state (locks, temp files, recon tokens, read marks)
+*.genome-lock
+*.genome-tmp
+.genome/
