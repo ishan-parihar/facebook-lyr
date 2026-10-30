@@ -6,6 +6,12 @@ import sys
 
 def main() -> None:
     """Handle tool interception or delegate to MCP server mode."""
+    if len(sys.argv) > 1 and sys.argv[1] in {"update", "upgrade"}:
+        from facebook_mcp_server.updater import run_update
+
+        raise SystemExit(
+            run_update(sys.argv[2:], application="facebook-lyr", package="facebook-lyr")
+        )
     # ── Direct tool invocation: facebook-lyr <tool_name> [args...] ──────
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
         # Set env var early before any imports.

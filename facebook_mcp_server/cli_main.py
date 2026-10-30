@@ -480,6 +480,8 @@ def show_help() -> None:
     print("  facebook-lyr --install-hook     Install session hooks (Claude Code/Codex)")
     print("  facebook-lyr --install-skill    Install agent skill for auto-discovery")
     print("  facebook-lyr --json             Render tool results as JSON")
+    print("  facebook-lyr update --check     Check for a package update")
+    print("  facebook-lyr update            Update through the owning package manager")
     print()
     print("Examples:")
     print("  facebook-lyr get_page_posts --username cocacola --max_posts 10")
@@ -505,6 +507,12 @@ def exit_gracefully(exit_code: int = 0) -> None:
 
 def main() -> None:
     """Main application entry point."""
+    if raw_args and raw_args[0] in {"update", "upgrade"}:
+        from facebook_mcp_server.updater import run_update
+
+        raise SystemExit(
+            run_update(raw_args[1:], application="facebook-lyr", package="facebook-lyr")
+        )
     config = get_config()
 
     configure_logging(
